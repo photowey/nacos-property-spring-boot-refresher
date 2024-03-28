@@ -20,13 +20,13 @@ import io.github.photowey.nacos.property.refresher.core.domain.meta.ConfigMeta;
 import java.util.Set;
 
 /**
- * {@code DynamicNacosConfigMetaRegistry}
+ * {@code DynamicConfigMetaNacosRegistry}
  *
  * @author photowey
  * @date 2024/03/28
  * @since 1.0.0
  */
-public interface DynamicNacosConfigMetaRegistry {
+public interface DynamicConfigMetaNacosRegistry {
 
     void registerConfigMeta(ConfigMeta meta);
 
