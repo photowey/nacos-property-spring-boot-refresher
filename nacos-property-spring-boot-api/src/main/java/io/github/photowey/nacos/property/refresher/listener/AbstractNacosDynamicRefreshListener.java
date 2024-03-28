@@ -24,7 +24,7 @@ import com.alibaba.nacos.spring.util.NacosBeanUtils;
 import io.github.photowey.nacos.property.refresher.core.domain.meta.ConfigMeta;
 import io.github.photowey.nacos.property.refresher.core.formatter.StringFormatter;
 import io.github.photowey.nacos.property.refresher.dynamic.NacosDynamicRefresher;
-import io.github.photowey.nacos.property.refresher.registry.DynamicNacosConfigMetaRegistry;
+import io.github.photowey.nacos.property.refresher.registry.DynamicConfigMetaNacosRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -40,16 +40,16 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * {@code AbstractDynamicNacosConfigListener}
+ * {@code AbstractNacosDynamicRefreshListener}
  *
  * @author photowey
  * @date 2024/03/29
  * @since 1.0.0
  */
-public abstract class AbstractDynamicNacosConfigListener extends AbstractConfigChangeListener implements
-        ApplicationListener<NacosConfigReceivedEvent>, DynamicNacosConfigMetaRegistry, InitializingBean, BeanFactoryAware {
+public abstract class AbstractNacosDynamicRefreshListener extends AbstractConfigChangeListener implements
+        ApplicationListener<NacosConfigReceivedEvent>, DynamicConfigMetaNacosRegistry, InitializingBean, BeanFactoryAware {
 
-    protected static final Logger log = LoggerFactory.getLogger(AbstractDynamicNacosConfigListener.class);
+    protected static final Logger log = LoggerFactory.getLogger(AbstractNacosDynamicRefreshListener.class);
 
     protected static final String DEFAULT_GROUP = "DEFAULT_GROUP";
     protected static final String DEFAULT_CONFIG_TYPE = "yaml";
@@ -75,21 +75,22 @@ public abstract class AbstractDynamicNacosConfigListener extends AbstractConfigC
 
     @Override
     public void onApplicationEvent(NacosConfigReceivedEvent event) {
-        log.info("Dynamic.nacos: on.spring.nacos.refresh.listener.received.config.changed.event:[{}:{}:{}]",
+        log.info("Dynamic.refresher: spring.nacos.dynamic.refresh.listener onchange.event(NacosConfigReceivedEvent):[{}:{}:{}]",
                 event.getGroupId(), event.getDataId(), event.getType());
 
-        if (this.configMetas.size() > 0) {
-            if (!this.configDataIds.contains(event.getDataId())) {
-                return;
-            }
+        if (this.configMetas.isEmpty()) {
+            return;
         }
 
+        if (!this.configDataIds.contains(event.getDataId())) {
+            return;
+        }
         this.onEvent(event);
     }
 
     @Override
     public void receiveConfigChange(ConfigChangeEvent event) {
-        log.info("Dynamic.nacos: nacos.refresh.listener.received.config.changed.event:{}", event);
+        log.info("Dynamic.refresher: spring.nacos.dynamic.refresh.listener onchange.event(ConfigChangeEvent):{}", event);
         this.onEvent(event);
     }
 
@@ -168,11 +169,12 @@ public abstract class AbstractDynamicNacosConfigListener extends AbstractConfigC
     public void addListener(ConfigService configService, String group, String dataId) {
         try {
             configService.addListener(dataId, group, this);
-            if (log.isDebugEnabled()) {
-                log.debug("refresher: register nacos dynamic refresh listener, meta:[dataId:{},group:{}]", dataId, group);
+            if (log.isInfoEnabled()) {
+                log.info("Dynamic.refresher: register nacos dynamic refresh listener, meta:[dataId:{},group:{}]", dataId, group);
             }
         } catch (Exception e) {
-            String message = StringFormatter.format("refresher: register nacos dynamic refresh listener failed, meta:[dataId:{},group:{}]", dataId, group);
+            String message = StringFormatter.format(
+                    "Dynamic.refresher: register nacos dynamic refresh listener failed, meta:[dataId:{},group:{}]", dataId, group);
             throw new RuntimeException(message, e);
         }
     }

@@ -72,7 +72,7 @@
         <central-publishing-maven-plugin.version>0.4.0</central-publishing-maven-plugin.version>
         <git-commit-id-plugin.version>4.9.10</git-commit-id-plugin.version>
 
-        <nacos-config-spring-boot-starter.version>0.3.0-RC </nacos-config-spring-boot-starter.version>
+        <nacos-config-spring-boot-starter.version>0.3.0-RC</nacos-config-spring-boot-starter.version>
         <io.github.photowey.project.url>https://github.com/photowey/nacos-property-spring-boot-refresher</io.github.photowey.project.url>
     </properties>
     <!-- @formatter:on -->

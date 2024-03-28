@@ -34,7 +34,7 @@ import org.springframework.context.annotation.Import;
 public class NacosDynamicRefresherAutoConfigure {
 
     @Bean
-    public NacosDynamicRefresher nacosRefreshScopeRefresher(NacosRefreshScope scope) {
+    public NacosDynamicRefresher nacosDynamicRefresher(NacosRefreshScope scope) {
         return new NacosDynamicRefresher(scope);
     }
 }

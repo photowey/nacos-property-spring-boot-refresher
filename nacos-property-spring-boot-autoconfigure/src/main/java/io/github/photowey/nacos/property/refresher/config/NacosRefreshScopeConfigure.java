@@ -30,7 +30,7 @@ import org.springframework.context.annotation.Configuration;
 public class NacosRefreshScopeConfigure {
 
     @Bean
-    public NacosRefreshScope nacosRefreshScope() {
+    public static NacosRefreshScope nacosRefreshScope() {
         return new NacosRefreshScope();
     }
 
