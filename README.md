@@ -22,7 +22,14 @@ Add this to your `pom.xml`
 
 ### 2.1.`Nacos`
 
-#### 2.1.1.`${application}-examples`
+- `data-ids`
+  - `${spring.application.name}`
+  - `${spring.application.name}-dev`
+  - `${spring.application.name}-app`
+
+#### 2.1.1.`${spring.application.name}`
+
+- Configure as you like
 
 ```yml
 local:
@@ -36,7 +43,9 @@ local:
         database: hello
 ```
 
-#### 2.1.2.`${application}-dev`
+
+
+#### 2.1.2.`${spring.application.name}-dev`
 
 ```yml
 server:
@@ -53,7 +62,9 @@ io:
             unit: MINUTES
 ```
 
-#### 2.1.3.`${application}-app`
+
+
+#### 2.1.3.`${spring.application.name}-app`
 
 - See `HelloDynamicNacosConfigListener#DYNAMIC_DATA_IDS`
 
@@ -69,12 +80,13 @@ io:
             unit: MINUTES
 ```
 
+
+
 ### 2.1.`Annotation`
 
 #### 2.1.0.`Properties`
 
 ```java
-
 @Data
 //@ConfigurationProperties(prefix = "io.github.photowey.dynamic.property")
 public class AppProperties {
@@ -100,7 +112,6 @@ public class AppProperties {
 ```
 
 ```java
-
 @Data
 //@ConfigurationProperties(prefix = "io.github.photowey.static.property")
 public class HelloProperties {
@@ -125,15 +136,16 @@ public class HelloProperties {
 }
 ```
 
+
+
 #### 2.1.1.`Configuration`
 
 ```java
-
 @Configuration
 public class DynamicPropertyConfigure {
 
-    // ...
-
+	// ...
+    
     @Bean
     @NacosDynamicRefreshScope
     public AppProperties appProperties(Environment environment) {
@@ -145,17 +157,18 @@ public class DynamicPropertyConfigure {
     public HelloProperties helloProperties(Environment environment) {
         return PropertyBinders.bind(environment, HelloProperties.getPrefix(), HelloProperties.class);
     }
-
+    
     // ...
 }
 ```
+
+
 
 #### 2.1.2.`Beans`
 
 > `@NacosDynamicRefreshScope`
 
 ```java
-
 @RestController
 @RequestMapping("/api/v1/scope")
 @NacosDynamicRefreshScope
@@ -163,6 +176,8 @@ public class ScopeApiController {
 
 }
 ```
+
+
 
 ### 2.2.`Listener`
 
@@ -172,6 +187,7 @@ public class ScopeApiController {
 // @Component || @Bean
 public class HelloDynamicNacosConfigListener extends AbstractNacosDynamicRefreshListener {
 
+    // {} -> ${spring.application.name}
     private static final List<String> DYNAMIC_DATA_IDS = Lists.newArrayList(
             "{}-app"
     );
@@ -182,26 +198,19 @@ public class HelloDynamicNacosConfigListener extends AbstractNacosDynamicRefresh
             DYNAMIC_DATA_IDS.forEach(dataIdTemplate -> this.addTemplateListener(configService, dataIdTemplate));
         }
     }
-
-    @Override
-    public void preRefresh(ConfigChangeEvent event) {
-        super.preRefresh(event);
-    }
-
-    @Override
-    public void posRefresh(ConfigChangeEvent event) {
-        super.posRefresh(event);
-    }
+    
+    // ...this#addListener
 }
 
 ```
+
+
 
 ### 2.3.`Controllers`
 
 #### 2.3.1.`Normal`
 
 ```java
-
 @RestController
 @RequestMapping("/api/v1")
 public class ApiController {
@@ -266,10 +275,11 @@ public class ApiController {
 }
 ```
 
+
+
 #### 2.3.2.`Scope`
 
 ```java
-
 @RestController
 @RequestMapping("/api/v1/scope")
 @NacosDynamicRefreshScope
@@ -334,6 +344,8 @@ public class ScopeApiController {
     }
 }
 ```
+
+
 
 #### 2.3.3.`Reulst`
 
