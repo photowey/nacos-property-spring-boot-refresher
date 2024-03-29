@@ -38,6 +38,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * {@code AbstractNacosDynamicRefreshListener}
@@ -59,6 +60,8 @@ public abstract class AbstractNacosDynamicRefreshListener extends AbstractConfig
     protected final Set<String> configDataIds = new HashSet<>();
 
     protected BeanFactory beanFactory;
+
+    protected final AtomicInteger atomic = new AtomicInteger();
 
     @Override
     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
@@ -122,7 +125,7 @@ public abstract class AbstractNacosDynamicRefreshListener extends AbstractConfig
      */
     protected void onEvent(ConfigChangeEvent event) {
         if (this.preRefresh(event)) {
-            log.info("Dynamic.refresher: spring.nacos.dynamic.refresh.listener onchange.event(ConfigChangeEvent):{}", event);
+            log.info("Dynamic.refresher: spring.nacos.dynamic.refresh.listener onchange.event(ConfigChangeEvent), counter:[{}]", this.atomic.getAndIncrement());
             this.nacosDynamicRefresher().refresh();
             this.posRefresh(event);
         }
