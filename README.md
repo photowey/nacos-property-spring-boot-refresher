@@ -26,6 +26,7 @@ Add this to your `pom.xml`
   - `${spring.application.name}`
   - `${spring.application.name}-dev`
   - `${spring.application.name}-app`
+    - monitored data-id
 
 #### 2.1.1.`${spring.application.name}`
 
@@ -188,6 +189,7 @@ public class ScopeApiController {
 public class HelloDynamicNacosConfigListener extends AbstractNacosDynamicRefreshListener {
 
     // {} -> ${spring.application.name}
+    // Register the dataid list that needs to be refreshed dynamically. 
     private static final List<String> DYNAMIC_DATA_IDS = Lists.newArrayList(
             "{}-app"
     );
