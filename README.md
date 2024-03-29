@@ -202,8 +202,15 @@ public class HelloDynamicNacosConfigListener extends AbstractNacosDynamicRefresh
     }
     
     // ...this#addListener
+    
+    // protected boolean preRefresh(NacosConfigReceivedEvent event) {}
+    // protected void posRefresh(NacosConfigReceivedEvent event) {}
+    // protected boolean preRefresh(ConfigChangeEvent event) {}
+    // protected void posRefresh(ConfigChangeEvent event) {}
+    
+    // protected boolean determineHandleNacosConfigReceivedEvent(NacosConfigReceivedEvent event) {}
+    // protected boolean determineHandleConfigChangeEvent(ConfigChangeEvent event) {}
 }
-
 ```
 
 
