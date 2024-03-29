@@ -38,6 +38,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * {@code AbstractNacosDynamicRefreshListener}
@@ -58,7 +59,9 @@ public abstract class AbstractNacosDynamicRefreshListener extends AbstractConfig
     protected final Set<ConfigMeta> configMetas = new HashSet<>();
     protected final Set<String> configDataIds = new HashSet<>();
 
-    private BeanFactory beanFactory;
+    protected BeanFactory beanFactory;
+
+    protected final AtomicInteger atomic = new AtomicInteger();
 
     @Override
     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
@@ -75,9 +78,6 @@ public abstract class AbstractNacosDynamicRefreshListener extends AbstractConfig
 
     @Override
     public void onApplicationEvent(NacosConfigReceivedEvent event) {
-        log.info("Dynamic.refresher: spring.nacos.dynamic.refresh.listener onchange.event(NacosConfigReceivedEvent):[{}:{}:{}]",
-                event.getGroupId(), event.getDataId(), event.getType());
-
         if (this.configMetas.isEmpty()) {
             return;
         }
@@ -85,31 +85,50 @@ public abstract class AbstractNacosDynamicRefreshListener extends AbstractConfig
         if (!this.configDataIds.contains(event.getDataId())) {
             return;
         }
+
         this.onEvent(event);
     }
 
     @Override
     public void receiveConfigChange(ConfigChangeEvent event) {
-        log.info("Dynamic.refresher: spring.nacos.dynamic.refresh.listener onchange.event(ConfigChangeEvent):{}", event);
         this.onEvent(event);
     }
 
     // ----------------------------------------------------------------
 
-    private void onEvent(NacosConfigReceivedEvent event) {
-        NacosDynamicRefresher refresher = this.beanFactory.getBean(NacosDynamicRefresher.class);
-
-        this.preRefresh(event);
-        refresher.refresh();
-        this.posRefresh(event);
+    protected NacosDynamicRefresher nacosDynamicRefresher() {
+        return this.beanFactory.getBean(NacosDynamicRefresher.class);
     }
 
-    private void onEvent(ConfigChangeEvent event) {
-        NacosDynamicRefresher refresher = this.beanFactory.getBean(NacosDynamicRefresher.class);
+    // ----------------------------------------------------------------
 
-        this.preRefresh(event);
-        refresher.refresh();
-        this.posRefresh(event);
+    /**
+     * This method can be `Overridden` by subclasses if necessary.
+     * <p>
+     * Notes: {@link NacosConfigReceivedEvent} is executed before {@link ConfigChangeEvent}.
+     *
+     * @param event {@link NacosConfigReceivedEvent}
+     */
+    protected void onEvent(NacosConfigReceivedEvent event) {
+        if (this.preRefresh(event)) {
+            log.info("Dynamic.refresher: spring.nacos.dynamic.refresh.listener onchange.event(NacosConfigReceivedEvent):[{}:{}:{}]",
+                    event.getGroupId(), event.getDataId(), event.getType());
+            this.nacosDynamicRefresher().refresh();
+            this.posRefresh(event);
+        }
+    }
+
+    /**
+     * This method can be `Overridden` by subclasses if necessary.
+     *
+     * @param event {@link ConfigChangeEvent}
+     */
+    protected void onEvent(ConfigChangeEvent event) {
+        if (this.preRefresh(event)) {
+            log.info("Dynamic.refresher: spring.nacos.dynamic.refresh.listener onchange.event(ConfigChangeEvent), counter:[{}]", this.atomic.getAndIncrement());
+            this.nacosDynamicRefresher().refresh();
+            this.posRefresh(event);
+        }
     }
 
     // ----------------------------------------------------------------
@@ -127,22 +146,32 @@ public abstract class AbstractNacosDynamicRefreshListener extends AbstractConfig
 
     // ----------------------------------------------------------------
 
-    public void preRefresh(ConfigChangeEvent event) {
+    protected boolean preRefresh(NacosConfigReceivedEvent event) {
         // do nothing
+        return this.determineHandleNacosConfigReceivedEvent(event);
     }
 
-    public void posRefresh(ConfigChangeEvent event) {
+    protected void posRefresh(NacosConfigReceivedEvent event) {
         // do nothing
     }
 
     // ----------------------------------------------------------------
 
-    public void preRefresh(NacosConfigReceivedEvent event) {
+    protected boolean preRefresh(ConfigChangeEvent event) {
+        // do nothing
+        return this.determineHandleConfigChangeEvent(event);
+    }
+
+    protected void posRefresh(ConfigChangeEvent event) {
         // do nothing
     }
 
-    public void posRefresh(NacosConfigReceivedEvent event) {
-        // do nothing
+    protected boolean determineHandleNacosConfigReceivedEvent(NacosConfigReceivedEvent event) {
+        return false;
+    }
+
+    protected boolean determineHandleConfigChangeEvent(ConfigChangeEvent event) {
+        return true;
     }
 
     // ----------------------------------------------------------------
